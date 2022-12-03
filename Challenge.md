@@ -1,6 +1,6 @@
-# Revend Hiring Challenge
+# <company> Hiring Challenge
 
-Dear future Revendeer, thank you so much for your interest in joining our team and company. You will be joining a fast growing organisation and be one of the very first people to help us define our culture.
+Dear future <company>, thank you so much for your interest in joining our team and company. You will be joining a fast growing organisation and be one of the very first people to help us define our culture.
 
 We kindly request you to complete the challenge below, should you be inclined to join us. We estimate it should take between 4 - 8 hours to complete. The objective of this assignment is for us to have an indication of where you are in your journey as a developer, as well as assess your ability to work independently.
 
@@ -17,10 +17,10 @@ Create a new python microservice that will:
       "source": "github",
       "change_type": "push",
       "data": {
-        "repository": "repo that was pushed to, ex: revendai/isengard",
+        "repository": "repo that was pushed to, ex: head/main",
     		"branch": "name of the branch the changes were pushed to, ex: main",,
         "commit": "commit sha that is the HEAD after the push",
-        "author": "Name/email of the author, ex: Alex Reis <alex@revend.ai>",
+        "author": "Name/email of the author, ex: name <name@company.com>",
         "message": "Last commit message that is not a merge commit",
       }
     }
@@ -28,7 +28,7 @@ Create a new python microservice that will:
     
 - Set up pylint and a Dockerfile to build a container for the python microservice
 - Set up a `docker-compose.yml` file that starts both the database and the docker container locally
-- Publish this code to a private github repository and invite user `alexmreis` as an external collaborator for review, or send a zip file of the code (including .git) to `alex@revend.ai`
+- Publish this code to a private github repository and invite us as an external collaborator for review.
 
 **Some tips**
 
@@ -44,5 +44,3 @@ Create a new python microservice that will:
 - Deploy the service to Herkou and connect it to the webhooks in your repository on GitHub. We would love to see a live demo 😉
 
 Good luck, and we look forward to receiving your completed assignment!
-
-Alex and Peter

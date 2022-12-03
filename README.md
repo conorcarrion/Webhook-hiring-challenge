@@ -55,6 +55,18 @@ repo : https://github.com/jakerieger/FlaskIntroduction
 
 # Friday 21:00-23:00
 
-Using postman, ngrok, flask, sqlalchemy to create webhookhandler.py
+Using postman, ngrok, flask, sqlalchemy to create webhookhandler.py. 
 
+@python
+```
+app = Flask(__name__)
+db = SQLAlchemy(app)
 
+@app.route('/github', methods=['POST'])
+def webhook():
+
+```
+
+# Saturday 16:30-17:30
+
+Finished webhookhandler.py and created dockerfile.
