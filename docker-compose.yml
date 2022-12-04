@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_TYPE: postgresql
+      DBAPI: psycopg2
+      HOST: postgres
+      USER: postgres
+      PASSWORD: pgpassword
+      DATABASE: postgres
+      PORT: 5432
+  postgres:
+    image: postgres:latest
+    ports: 
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: pgpassword

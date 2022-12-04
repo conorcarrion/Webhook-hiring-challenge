@@ -1,2 +1,6 @@
 flask
 flask_sqlalchemy
+psycopg2-binary
+pylint
+pylint-flask-sqlalchemy
+pylint-flask
