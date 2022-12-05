@@ -4,23 +4,36 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
-load_dotenv()
-DATABASE_TYPE = os.getenv("DATABASE_TYPE")
-DBAPI = os.getenv("DBAPI")
-HOST = os.getenv("HOST")
-USER = os.getenv("USER1")
-PASSWORD = os.getenv("PASSWORD")
-DATABASE = os.getenv("DATABASE")
-PORT = os.getenv("PORT")
+def get_envs():
+    load_dotenv()
+    DATABASE_TYPE = os.getenv("DATABASE_TYPE")
+    DBAPI = os.getenv("DBAPI")
+    HOST = os.getenv("HOST")
+    USER = os.getenv("USER1")
+    PASSWORD = os.getenv("PASSWORD")
+    DATABASE = os.getenv("DATABASE")
+    PORT = os.getenv("PORT")
 
-app = Flask(__name__)
+    return DATABASE_TYPE, DBAPI, USER, PASSWORD, HOST, PORT, DATABASE
 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config[
-    "SQLALCHEMY_DATABASE_URI"
-] = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+def create_app():
 
-db = SQLAlchemy(app)
+    DATABASE_TYPE, DBAPI, USER, PASSWORD, HOST, PORT, DATABASE = get_envs()
+    app = Flask(__name__)
+
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ] = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+    return app 
+
+def create_db(app):
+    db = SQLAlchemy(app)
+    return db
+
+app = create_app()
+
+db = create_db(app)
 
 
 class Event(db.Model):
@@ -32,10 +45,16 @@ class Event(db.Model):
     def __init__(self, data):
         self.data = data
 
+def upserter(data):
+    data_json = json.dumps(data, indent=4)
+    event = Event(data_json)
+    db.session.add(event)
+    db.session.commit()
 
+    
 @app.route("/")
 def root():
-    return "Welcome to My Github Webhook Handler"
+    return "Welcome to my Github Webhook Handler"
 
 
 @app.route("/github", methods=["POST"])
@@ -58,11 +77,10 @@ def webhook():
                 "message": event["head_commit"]["message"],
             },
         }
-        data_json = json.dumps(data, indent=4)
-        event = Event(data_json)
-        db.session.add(event)
-        db.session.commit()
-        return "200 Event Data added to Database"
+        
+        upserter(data)
+
+        return f"200 Webhook received \n\n {data}", data
 
     elif not confirm_json:
         return '415	Unsupported Media Type. The request data format is not supported by the server. Only Json is accepted'
@@ -75,7 +93,6 @@ def webhook():
 
     else:
         return '400 Bad Request'
-
 
 db.create_all()
 
