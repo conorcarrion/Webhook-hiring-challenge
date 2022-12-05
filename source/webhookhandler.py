@@ -2,7 +2,9 @@ import os
 import json
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 
+load_dotenv()
 DATABASE_TYPE = os.getenv("DATABASE_TYPE")
 DBAPI = os.getenv("DBAPI")
 HOST = os.getenv("HOST")
@@ -12,6 +14,7 @@ DATABASE = os.getenv("DATABASE")
 PORT = os.getenv("PORT")
 
 app = Flask(__name__)
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config[
     "SQLALCHEMY_DATABASE_URI"
@@ -32,7 +35,7 @@ class Event(db.Model):
 
 @app.route("/")
 def root():
-    return "Welcome to CQ Webhook Handler"
+    return "Welcome to My Github Webhook Handler"
 
 
 @app.route("/github", methods=["POST"])
@@ -59,11 +62,23 @@ def webhook():
         event = Event(data_json)
         db.session.add(event)
         db.session.commit()
-        return "Push Data added to Database"
+        return "200 Event Data added to Database"
+
+    elif not confirm_json:
+        return '415	Unsupported Media Type. The request data format is not supported by the server. Only Json is accepted'
+
+    elif not confirm_push:
+        return '202 Only push events accepted to Database'
+
+    elif not confirm_main:
+        return '202 Only main branch events accepted to Database'
+
     else:
-        return "Data does not meet specification and was not upserted."
+        return '400 Bad Request'
+
 
 db.create_all()
 
+
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True)
