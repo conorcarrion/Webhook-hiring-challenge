@@ -83,8 +83,22 @@ docs: https://docs.docker.com/compose/gettingstarted/
 
 Reading https://flask-testing.readthedocs.io/en/v0.4/ for flask unit testing
 
-Perhaps should use jsonify instead of json_dumps for response. https://www.fullstackpython.com/flask-json-jsonify-examples.html
 
+### Tuesday 19:30-21:30
+
+Testing proving to be a real problem.
+
+https://flask-sqlalchemy.palletsprojects.com/en/3.0.x/contexts/
+
+https://circleci.com/blog/testing-flask-framework-with-pytest/
+
+https://coderpad.io/blog/development/a-guide-to-database-unit-testing-with-pytest-and-sqlalchemy/
+
+https://flask.palletsprojects.com/en/2.2.x/testing/
+
+Made Github action to lint, run testing and make dockerfile. 
+
+Returned to testing, made some progress with the tests but still unsure of pytest fixtures, Flask instantiation and appropriate setup & Teardown.
 
 
 # Appendix
