@@ -41,7 +41,7 @@ class Event(db.Model):
         self.data = data
 
 def upserter(data):
-    data_json = json.dumps(data, indent=4)
+    data_json = json.dumps(data)
     event = Event(data_json)
     db.session.add(event)
     db.session.commit()
