@@ -2,53 +2,34 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask.ext.testing import TestCase
 from testing.postgresql import Postgresql
-from conftest import data
-from source.webhookhandler import webhook, Event
+from conftest import data as test_data
+import source.app
+import pytest
 
 
-class MyTest(TestCase):
-    
-    SQLALCHEMY_DATABASE_URI = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
-    TESTING = True
-    with Postgresql() as postgresql:
-    app.config['SQLALCHEMY_DATABASE_URI'] = postgresql.url()
+@pytest.fixture()
+def app():
+    app = source.app.create_app()
+    app.config.update({
+        "TESTING": True,
+    })
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    # other setup can go here
+    app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ] = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+    yield app
 
-    def create_app(self):
-
-        app = Flask(__name__)
-        app.config['TESTING'] = True
-        
-        return create_app(self)
-
-
-    def create_db(self):
-        db = SQLAlchemy(app)
-        return create_db(self)
-
-    def setUp(self):
-
-        db.create_all()
-
-    def tearDown(self):
-
-        db.session.remove()
-        db.drop_all()
+    # clean up / reset resources here
 
 
-class test_new_event(MyTest):
-
-    def test_(self):
-
-        event = Event(data)
-        db.session.add(event)
-        db.session.commit()
-
-        assert event in db.session
-
-        
+@pytest.fixture()
+def client(app):
+    return app.test_client()
 
 
-class TestViews(TestCase):
-    def test_some_json(self):
-        response = self.client.get("/github")
-        self.assertEquals(response.json, dict(success=True))
+def test_request_example(client):
+    response = client.get("/")
+    assert b"Welcome to my Github Webhook Handler" in response.data
+
+

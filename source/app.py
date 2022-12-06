@@ -4,36 +4,31 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
-def get_envs():
-    load_dotenv()
-    DATABASE_TYPE = os.getenv("DATABASE_TYPE")
-    DBAPI = os.getenv("DBAPI")
-    HOST = os.getenv("HOST")
-    USER = os.getenv("USER1")
-    PASSWORD = os.getenv("PASSWORD")
-    DATABASE = os.getenv("DATABASE")
-    PORT = os.getenv("PORT")
 
-    return DATABASE_TYPE, DBAPI, USER, PASSWORD, HOST, PORT, DATABASE
+load_dotenv()
+DATABASE_TYPE = os.getenv("DATABASE_TYPE")
+DBAPI = os.getenv("DBAPI")
+HOST = os.getenv("HOST")
+USER = os.getenv("USER1")
+PASSWORD = os.getenv("PASSWORD")
+DATABASE = os.getenv("DATABASE")
+PORT = os.getenv("PORT")
+
 
 def create_app():
 
-    DATABASE_TYPE, DBAPI, USER, PASSWORD, HOST, PORT, DATABASE = get_envs()
     app = Flask(__name__)
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config[
         "SQLALCHEMY_DATABASE_URI"
     ] = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+    print(app.config["SQLALCHEMY_DATABASE_URI"])
     return app 
 
-def create_db(app):
-    db = SQLAlchemy(app)
-    return db
 
 app = create_app()
-
-db = create_db(app)
+db = SQLAlchemy(app)
 
 
 class Event(db.Model):
@@ -80,20 +75,19 @@ def webhook():
         
         upserter(data)
 
-        return f"200 Webhook received \n\n {data}", data
+        return f"Webhook received: \n\n {data}", 200
 
     elif not confirm_json:
-        return '415	Unsupported Media Type. The request data format is not supported by the server. Only Json is accepted'
+        return 'Unsupported Media Type. The request data format is not supported by the server. Only Json is accepted', 415	
 
     elif not confirm_push:
-        return '202 Only push events accepted to Database'
+        return 'Only push events accepted to Database', 202
 
     elif not confirm_main:
-        return '202 Only main branch events accepted to Database'
+        return 'Only main branch events accepted to Database', 202 
 
     else:
-        return '400 Bad Request'
-
+        return 'Bad Request', 400 
 db.create_all()
 
 
