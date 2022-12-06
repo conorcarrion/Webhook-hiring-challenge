@@ -19,7 +19,7 @@ DATABASE = os.getenv("DATABASE")
 PORT = os.getenv("PORT")
 
 # instantiating Flask and configuring sqlalchemy database uri based on env variables
-def create_app():
+def create_flask_app():
 
     app = Flask(__name__)
 
@@ -29,7 +29,7 @@ def create_app():
     ] = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
     return app
 
-flask_app = create_app()
+flask_app = create_flask_app()
 
 # instantiating sqlalchemy database
 db = SQLAlchemy(flask_app)
@@ -48,7 +48,7 @@ class ChangeEvent(db.Model):
 
 
 # Converting event to database object and adding/committing to database.
-def add_change_event_to_db(mod_request_json):
+def add_change_event_to_db(db, mod_request_json):
 
     change_event_object = ChangeEvent(mod_request_json)
     db.session.add(change_event_object)
@@ -90,7 +90,7 @@ def webhook_receiver():
             },
         }
         mod_request_json = json.dumps(mod_request_dict)
-        add_change_event_to_db(mod_request_json)
+        add_change_event_to_db(db, mod_request_json)
         return "Webhook received and information added to database", 200
 
     # Pushes to repository not on main branch are not actioned
