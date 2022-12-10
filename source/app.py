@@ -18,18 +18,21 @@ PASSWORD = os.getenv("PASSWORD")
 DATABASE = os.getenv("DATABASE")
 PORT = os.getenv("PORT")
 
+dv_env = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+db = SQLAlchemy()
+
 # instantiating Flask and configuring sqlalchemy database uri based on env variables
-def create_flask_app():
+def create_flask_app(db_env):
 
     app = Flask(__name__)
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config[
-                "SQLALCHEMY_DATABASE_URI"
-    ] = f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_env
     return app
 
 flask_app = create_flask_app()
+
+db.init_app(flask_app)
 
 # instantiating sqlalchemy database
 db = SQLAlchemy(flask_app)
@@ -45,14 +48,18 @@ class ChangeEvent(db.Model):
     def __init__(self, data):
         self.data = data
 
-
+with flask_app.app_context():
+    db.create_all()
 
 # Converting event to database object and adding/committing to database.
-def add_change_event_to_db(db, mod_request_json):
+@classmethod
+class ChangeEventRepository:
 
-    change_event_object = ChangeEvent(mod_request_json)
-    db.session.add(change_event_object)
-    db.session.commit()
+    def add_change_event_to_db(db, mod_request_json):
+
+        change_event_object = ChangeEvent(mod_request_json)
+        db.session.add(change_event_object)
+        db.session.commit()
 
 
 # Defining homepage behaviour

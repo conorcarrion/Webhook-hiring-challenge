@@ -101,6 +101,12 @@ Made Github action to lint, run testing and make dockerfile.
 Returned to testing, made some progress with the tests but still unsure of pytest fixtures, Flask instantiation and appropriate setup & Teardown.
 
 
+### Saturday 16:30
+
+Unfortunately during a Ubuntu reinstall my personal documents and my progress on the test_app.py since Wednesday were lost. I believe I still learned a lot and will be able to rewrite it with what I learned, but it is still a setback. 
+
+
+
 # Appendix
 
 # <company> Hiring Challenge
