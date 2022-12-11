@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 # loading environment variables
-user = os.getenv("USER1")
+user = os.getenv("USER")
 password = os.getenv("PASSWORD")
 host = os.getenv("HOST")
 port = os.getenv("PORT")
@@ -41,10 +41,13 @@ class ChangeEvent(db.Model):
         self.data = data
 
 
+with flask_app.app_context():
+    db.create_all()
+
 # Defining homepage behaviour
 @flask_app.route("/")
 def root():
-    return "Welcome to my Github Webhook Handler - test"
+    return "Welcome to my Github Webhook Handler"
 
 
 # Defining actions to take upon receiving a POST request to url/github
@@ -58,7 +61,7 @@ def webhook_receiver():
         # confirm webhook trigger is due to a push
         confirm_push = request.headers["X-Github-Event"] == "push"
         # identify the default branch of the repository
-        default_branch = request.json["default_branch"]
+        default_branch = request.json["repository"]["default_branch"]
         # confirm the push is for the default branch
         confirm_default = request.json["ref"].split("/")[-1] == default_branch
         return confirm_json and confirm_push and confirm_default
@@ -82,7 +85,7 @@ def webhook_receiver():
                     # commit sha that is the HEAD after the push
                     "commit": request_body["after"],
                     # name/email of the author
-                    "author": request_body["head_commit"]["author"][:-1],
+                    "author": request_body["head_commit"]["author"],
                     # last commit message that is not a merge commit
                     "message": request_body["head_commit"]["message"],
                 },
@@ -94,8 +97,14 @@ def webhook_receiver():
         return "Webhook received and information added to database", 200
 
     # Pushes to repository not on main branch are not actioned
-    if not request.json["ref"].split("/")[-1] == request.json["default_branch"]:
+    if (
+        not request.json["ref"].split("/")[-1]
+        == request.json["repository"]["default_branch"]
+    ):
         return "Push request not for default branch, not actioned", 200
+
+    if not request.headers["X-Github-Event"] == "push":
+        return "Request is not a push request, not actioned", 200
 
     # POST requests not json or push are flagged as bad requests.
     return "Bad Request, ", 400

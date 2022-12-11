@@ -21,4 +21,7 @@ services:
     ports: 
       - 5433:5432
     environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: postgres

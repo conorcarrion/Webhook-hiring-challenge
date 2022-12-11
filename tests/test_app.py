@@ -1,90 +1,64 @@
 import json
 import pytest
 from source.app import flask_app, db, ChangeEvent
+from pytest_fixtures import (
+    client,
+    valid_payload_headers,
+    valid_payload_body,
+    valid_change_event_data,
+    invalid_payload_headers,
+    invalid_payload_body,
+)
 
 
-@pytest.fixture
-def client():
-    flask_app.config["TESTING"] = True
-    client = flask_app.test_client()
+def test_homepage(client):
+    test_response = client.get("/")
+    assert test_response.status_code == 200
 
-    yield client
-
-
-def test_root(client):
-    response = client.get("/")
-    assert response.status_code == 200, "Get request from homepage was not succesful"
-    assert (
-        response.data == "Welcome to my Github Webhook Handler"
-    ), "Get request homepage message not showing"
+    # Verify that the test_response message is "Welcome to my Github Webhook Handler"
+    assert test_response.data == b"Welcome to my Github Webhook Handler"
 
 
-def test_webhook_receiver_push_event(client):
-    # Set up a test payload that simulates a push event to the default branch
-    payload = {
-        "headers": {"content-type": "application/json", "X-Github-Event": "push"},
-        "json": {
-            "default_branch": "main",
-            "ref": "refs/heads/main",
-            "after": "123456789abcdef",
-            "repository": {"name": "test_repo"},
-            "head_commit": {
-                "author": {
-                    "name": "Wednesday Addams",
-                    "email": "Wednesdayaddams@example.com",
-                },
-                "timestamp": "2022-12-11T12:34:56Z",
-                "message": "Add new feature",
-            },
-        },
-    }
+def test_webhook_receiver_push_event(
+    client, valid_payload_headers, valid_payload_body, valid_change_event_data
+):
 
     # Make a POST request with the test payload
-    response = client.post("/github", data=payload, content_type="application/json")
-    assert response.status_code == 200, "post request to /github not succesful"
-    assert (
-        response.data == "Webhook received and information added to database"
-    ), "post request to /github message not shown"
+    test_response = client.post(
+        "/github", headers=valid_payload_headers, json=valid_payload_body
+    )
+    test_json = test_response.json
 
     # Check that the correct information was added to the database
-    change_event = ChangeEvent.query.first()
-    assert change_event.data == {
-        "ts": "2022-12-11T12:34:56Z",
-        "source": "github",
-        "change_type": "push",
-        "data": {
-            "repository": "test_repo",
-            "branch": "main",
-            "commit": "123456789abcdef",
-            "author": {
-                "name": "Wednesday Addams",
-                "email": "Wednesdayaddams@example.com",
-            },
-            "message": "Add new feature",
-        },
-    }, "Post request to /github, Database entry does not match the payload"
+    with flask_app.app_context():
+        test_change_event = ChangeEvent(test_json)
+        change_event_query = ChangeEvent.query.order_by(ChangeEvent.id.desc()).first()
+        assert change_event_query.data == valid_change_event_data
+
+    assert test_response.status_code == 200
+    assert b"Webhook received and information added to database" in test_response.data
 
 
-def test_webhook_receiver_non_push_event(client):
+def test_webhook_receiver_non_push_event(
+    client, invalid_payload_headers, valid_payload_body
+):
     # Set up a test payload that simulates a non-push event
-    payload = {
-        "headers": {"content-type": "application/json", "X-Github-Event": "pull"},
-        "json": {
-            "default_branch": "main",
-            "ref": "refs/heads/main",
-            "after": "123456789abcdef",
-            "repository": {"name": "my_repo"},
-            "head_commit": {
-                "author": {"name": "John Doe", "email": "johndoe@example.com"},
-                "timestamp": "2022-12-11T12:34:56Z",
-                "message": "Add new feature",
-            },
-        },
-    }
-    response = client.post("/github", data=payload, content_type="application/json")
-    assert (
-        response.status_code == 200
-    ), "post request to /github with non-push event not succesful"
-    assert (
-        response.data == "Push request not for default branch, not actioned"
-    ), "post request to /github with non-push event not showing correct message"
+
+    test_response = client.post(
+        "/github", headers=invalid_payload_headers, json=valid_payload_body
+    )
+
+    assert test_response.status_code == 200
+    assert b"Request is not a push request, not actioned" in test_response.data
+
+
+def test_webhook_receiver_non_mainbranch_event(
+    client, valid_payload_headers, invalid_payload_body
+):
+    # Set up a test payload that simulates a non-push event
+
+    test_response = client.post(
+        "/github", headers=valid_payload_headers, json=invalid_payload_body
+    )
+    assert test_response.status_code == 200
+    assert b"Push request not for default branch, not actioned" in test_response.data

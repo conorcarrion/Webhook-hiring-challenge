@@ -1,8 +1,9 @@
 FROM python:latest
-RUN mkdir /app
-WORKDIR /app
+RUN mkdir /revend
+WORKDIR /revend
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY source .
+ENV PYTHONPATH="$PYTHONPATH:/revend"
+COPY . .
 EXPOSE 5000
-CMD ["python3", "app.py"]
+CMD ["python", "source/app.py"]
