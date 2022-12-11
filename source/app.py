@@ -102,7 +102,7 @@ def webhook_receiver():
         == request.json["repository"]["default_branch"]
     ):
         return "Push request not for default branch, not actioned", 200
-
+    # Non push post requests are not actioned
     if not request.headers["X-Github-Event"] == "push":
         return "Request is not a push request, not actioned", 200
 
@@ -110,5 +110,6 @@ def webhook_receiver():
     return "Bad Request, ", 400
 
 
+# run code
 if __name__ == "__main__":
     flask_app.run(debug=True, host="0.0.0.0")
