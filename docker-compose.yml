@@ -4,7 +4,10 @@ services:
     build: .
     ports:
       - "5000:5000"
+    volumes:
+      - .:/code
     environment:
+      FLASK_DEBUG: True
       DATABASE_TYPE: postgresql
       DBAPI: psycopg2
       HOST: postgres
