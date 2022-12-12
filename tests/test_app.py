@@ -1,6 +1,6 @@
 import json
 import pytest
-from source.app import flask_app, db, ChangeEvent
+from source.app import app, db, ChangeEvent
 from pytest_fixtures import (
     client,
     valid_payload_headers,
@@ -31,7 +31,7 @@ def test_webhook_receiver_push_event(
     test_json = test_response.json
 
     # Check that the correct information was added to the database
-    with flask_app.app_context():
+    with app.app_context():
         test_change_event = ChangeEvent(test_json)
         change_event_query = ChangeEvent.query.order_by(ChangeEvent.id.desc()).first()
         assert change_event_query.data == valid_change_event_data.replace("'", '"')

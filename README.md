@@ -101,10 +101,32 @@ Made Github action to lint, run testing and make dockerfile.
 Returned to testing, made some progress with the tests but still unsure of pytest fixtures, Flask instantiation and appropriate setup & Teardown.
 
 
-### Saturday 16:30
+### Saturday 
 
 Unfortunately during a Ubuntu reinstall my personal documents and my progress on the test_app.py since Wednesday were lost. I believe I still learned a lot and will be able to rewrite it with what I learned, but it is still a setback. 
 
+### Sunday
+
+Worked on learning how to use docker instead of miniconda or virtualenv. Learned how to use volumes. Made changes to dockerfile and docker-compose. 
+
+Almost wrapped up testing, 3/4 passing, last one is due to formatting, need to work out why. 
+
+### Monday 07:30
+
+Not happy with current config setup for database variables. I want to be able to load a different postgres database for testing, development and production. 
+
+Read:
+https://www.thedigitalcatonline.com/blog/2020/07/05/flask-project-setup-tdd-docker-postgres-and-more-part-1/
+
+The above project essentially has a config.py file, which has a Base config class and then Production, development and testing config classes which inherit from Base. Then the project uses json files to store environment variables and a script which uses click to do some more clever things. This was a bit too much.
+
+I want to implement removing the environment variables from the docker-compose and only having one: FLASK_CONFIG="development" (or ="testing", or "production". I might even be able to not have it in the compose file at all, I don't know if -> FLASKCONFIG="development" docker compose up   would work.
+
+I also have seen declarative_base() in a few documents and wanted to understand this. 
+
+Read:
+https://staskoltsov.medium.com/demystifying-flask-sqlalchemy-a3d8a786ed2f
+Seems to be to allow a separation of the model, for example ChangeEvent, from the db=SQLAlchemy() variable/instance, which itself is tied to the 'app' Flask variable/instance. It does this by creating a custom model class. It used to be a third party extension but is now available through: sqlalchemy.ext.declarative import declarative_base.
 
 
 # Appendix
