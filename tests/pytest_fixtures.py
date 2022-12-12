@@ -1,28 +1,13 @@
 import pytest
-from source.app import app, db, ChangeEvent
-from flask_sqlalchemy import SQLAlchemy
+from source.app import flask_app, db, ChangeEvent
 
 
 @pytest.fixture
 def client():
-    app.config["TESTING"] = True
-    client = app.test_client()
+    flask_app.config["TESTING"] = True
+    client = flask_app.test_client()
 
     yield client
-
-
-@pytest.fixture
-def db():
-    app.config["SQLALCHEMY_DATABASE_URI"] = ""
-    db = SQLAlchemy(app)
-
-    # Create all the tables in the database
-    db.create_all()
-
-    yield db
-
-    # Drop all the tables in the database
-    db.drop_all()
 
 
 @pytest.fixture

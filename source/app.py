@@ -5,7 +5,6 @@ import os
 import json
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
-from models import ChangeEvent
 
 
 # loading environment variables
@@ -18,7 +17,7 @@ dbname = os.getenv("DATABASE")
 db_env = f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
 
 # instantiating Flask
-def create_app(credentials):
+def create_flask_app(credentials):
 
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -26,33 +25,33 @@ def create_app(credentials):
     return app
 
 
-app = create_app(db_env)
+flask_app = create_flask_app(db_env)
 
 # instantiating sqlalchemy database
-db = SQLAlchemy(app)
+db = SQLAlchemy(flask_app)
 
-with app.app_context():
+
+# Database object to allow insertion of webhook information into sql database
+class ChangeEvent(db.Model):
+    __tablename__ = "changes"
+    id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(db.JSON, nullable=False)
+
+    def __init__(self, data):
+        self.data = data
+
+
+with flask_app.app_context():
     db.create_all()
 
-# TODO @classmethod
-# class ChangeEventRepository:
-#     def create():
-
-#     def read():
-
-#     def update():
-
-#     def delete():
-
-
 # Defining homepage behaviour
-@app.route("/")
+@flask_app.route("/")
 def root():
     return "Welcome to my Github Webhook Handler"
 
 
 # Defining actions to take upon receiving a POST request to url/github
-@app.route("/github", methods=["POST"])
+@flask_app.route("/github", methods=["POST"])
 def webhook_receiver():
 
     # Filtering change events to only json, only main, only branch
@@ -113,4 +112,4 @@ def webhook_receiver():
 
 # run code
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    flask_app.run(debug=True, host="0.0.0.0")
