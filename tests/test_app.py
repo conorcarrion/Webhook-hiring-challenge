@@ -1,7 +1,8 @@
 import json
 import pytest
-from source.app import app, db, ChangeEvent
+from source.app import ChangeEvent, app
 from pytest_fixtures import (
+    db,
     client,
     valid_payload_headers,
     valid_payload_body,

@@ -1,15 +1,20 @@
 class Config(object):
     TESTING = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class ProductionConfig(Config):
-    DATABASE_URI = "mysql://user@localhost/foo"
+    SQLALCHEMY_DATABASE_URI = "mysql://user@localhost/foo"
 
 
 class DevelopmentConfig(Config):
-    DATABASE_URI = "postgresql+psycopg2://postgres:pgpassword@postgres:5432/postgres"
+    SQLALCHEMY_DATABASE_URI = (
+        "postgresql+psycopg2://postgres:pgpassword@db:5432/postgres"
+    )
 
 
 class TestingConfig(Config):
-    DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = (
+        "postgresql+psycopg2://postgres:pgpassword@db-test:5433/testing"
+    )
     TESTING = True

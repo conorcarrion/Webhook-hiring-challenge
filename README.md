@@ -128,6 +128,34 @@ Read:
 https://staskoltsov.medium.com/demystifying-flask-sqlalchemy-a3d8a786ed2f
 Seems to be to allow a separation of the model, for example ChangeEvent, from the db=SQLAlchemy() variable/instance, which itself is tied to the 'app' Flask variable/instance. It does this by creating a custom model class. It used to be a third party extension but is now available through: sqlalchemy.ext.declarative import declarative_base.
 
+# Monday 
+
+I have been looking at options to avoid using environment variables and load_dotenv() for the postgres configuration. I have worked out app.config.fromobject and app.config.frompyfile.  
+
+Object could be convenient for something like this:
+```
+class Config(object):
+    TESTING = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class ProductionConfig(Config):
+    DATABASE_URI = "mysql://user@localhost/foo"
+
+
+class DevelopmentConfig(Config):
+    DATABASE_URI = "postgresql+psycopg2://postgres:pgpassword@postgres:5432/postgres"
+
+
+class TestingConfig(Config):
+    DATABASE_URI = "sqlite:///:memory:"
+    TESTING = True
+
+```
+Which I found in the docs. However the from_object docs say:
+from_object(obj)
+"You should not use this function to load the actual configuration but rather configuration defaults. The actual config should be loaded with from_pyfile() and ideally from a location not within the package because the package might be installed system wide."
+
+So I am not sure whethey they recommend it or not.
 
 # Appendix
 

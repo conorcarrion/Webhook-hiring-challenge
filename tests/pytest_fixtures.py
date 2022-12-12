@@ -1,10 +1,12 @@
 import pytest
-from source.app import app, db, ChangeEvent
+from source.app import app
 from flask_sqlalchemy import SQLAlchemy
+from config.config import TestingConfig
 
 
 @pytest.fixture
 def client():
+
     app.config["TESTING"] = True
     client = app.test_client()
 
@@ -12,8 +14,8 @@ def client():
 
 
 @pytest.fixture
-def db():
-    app.config["SQLALCHEMY_DATABASE_URI"] = ""
+def db(app):
+    app.config.from_object(TestingConfig())
     db = SQLAlchemy(app)
 
     # Create all the tables in the database
