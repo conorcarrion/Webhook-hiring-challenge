@@ -3,3 +3,4 @@ flask
 pylint
 flask_sqlalchemy
 pytest
+python-dotenv

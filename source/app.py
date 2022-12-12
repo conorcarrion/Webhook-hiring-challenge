@@ -22,9 +22,6 @@ app = create_app()
 # instantiating sqlalchemy database
 db = SQLAlchemy(app)
 
-with app.app_context():
-    db.create_all()
-
 
 class ChangeEvent(db.Model):
     __tablename__ = "changes"
@@ -37,6 +34,9 @@ class ChangeEvent(db.Model):
     def __repr__(self):
         return "<Change Event Data = {}>".format(self.data)
 
+
+with app.app_context():
+    db.create_all()
 
 # TODO @classmethod
 # class ChangeEventRepository:

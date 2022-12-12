@@ -17,29 +17,29 @@ def test_homepage(client):
     assert test_response.status_code == 200
 
     # Verify that the test_response message is "Welcome to my Github Webhook Handler"
-    assert test_response.data == b"Welcome to my Github Webhook Handler"
+    assert b"Welcome to my Github Webhook Handler" in test_response.data
 
 
 # positive/functional test for a push event to the main branch
-def test_webhook_receiver_push_event(
-    client, valid_payload_headers, valid_payload_body, valid_change_event_data
-):
+def test_webhook_receiver_push_event(client, valid_payload_headers, valid_payload_body):
 
     # Simulate a POST request with the valid test fixtures
     test_response = client.post(
         "/github", headers=valid_payload_headers, json=valid_payload_body
     )
-    test_json = test_response.json
-
-    # Check that the correct information was added to the database
-    with app.app_context():
-        test_change_event = ChangeEvent(test_json)
-        change_event_query = ChangeEvent.query.order_by(ChangeEvent.id.desc()).first()
-        assert change_event_query.data == valid_change_event_data.replace("'", '"')
 
     # Check that the app response was correct
     assert test_response.status_code == 200
     assert b"Webhook received and information added to database" in test_response.data
+
+
+def test_change_event(valid_change_event_data):
+    # Check that the correct information was added to the database
+    change_event = ChangeEvent(valid_change_event_data)
+    query = db.session.query(ChangeEvent).first()
+    assert change_event.id == query.id
+    assert change_event.data == valid_change_event_data
+    assert query.data == valid_change_event_data
 
 
 def test_webhook_receiver_non_push_event(

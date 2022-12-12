@@ -15,7 +15,7 @@ services:
     container_name: db
     image: postgres:latest
     ports: 
-      - 5433:5432
+      - 5432:5432
     env_file:
       - .env
 
@@ -24,9 +24,9 @@ services:
     container_name: db-test
     image: postgres:latest
     ports: 
-      - 5432:5433
+      - 5433:5432
     environment:
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: db-test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pgpassword
-      POSTGRES_DB: postgres
+      POSTGRES_DB: testing
