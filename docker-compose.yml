@@ -7,23 +7,11 @@ services:
       - "5000:5000"
     volumes:
       - .:/code
-    environment:
-      FLASK_DEBUG: True
-      DATABASE_TYPE: postgresql
-      DBAPI: psycopg2
-      HOST: postgres
-      USER: postgres
-      PASSWORD: pgpassword
-      DATABASE: postgres
-      PORT: 5432
     
-  postgres:
-    image: postgres:latest
+  db:
     container_name: db
+    image: postgres:15.1-alpine
     ports: 
-      - 5433:5432
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pgpassword
-      POSTGRES_DB: postgres
+      - 5432
+    env_file:
+      - .env

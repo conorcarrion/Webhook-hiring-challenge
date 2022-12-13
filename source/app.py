@@ -5,43 +5,40 @@ import os
 import json
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
+from config.config import Config
+from datetime import datetime
 
-
-# loading environment variables
-user = os.getenv("USER")
-password = os.getenv("PASSWORD")
-host = os.getenv("HOST")
-port = os.getenv("PORT")
-dbname = os.getenv("DATABASE")
-
-db_env = f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
 
 # instantiating Flask
-def create_flask_app(credentials):
+def create_app(config):
 
     app = Flask(__name__)
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SQLALCHEMY_DATABASE_URI"] = credentials
+
+    app.config.from_object(config)
     return app
 
 
-flask_app = create_flask_app(db_env)
+app = create_app(Config)
 
 # instantiating sqlalchemy database
 db = SQLAlchemy(flask_app)
 
 
-# Database object to allow insertion of webhook information into sql database
 class ChangeEvent(db.Model):
     __tablename__ = "changes"
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.JSON, nullable=False)
+    date_added = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, data):
         self.data = data
+        self.date_added = datetime.now()
+
+    def __repr__(self):
+        return f"{self.date_added}, <Change Event Data = {self.data}>"
 
 
-with flask_app.app_context():
+with app.app_context():
     db.create_all()
 
 # Defining homepage behaviour

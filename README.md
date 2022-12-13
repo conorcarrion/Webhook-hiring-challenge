@@ -106,6 +106,57 @@ Returned to testing, made some progress with the tests but still unsure of pytes
 Unfortunately during a Ubuntu reinstall my personal documents and my progress on the test_app.py since Wednesday were lost. I believe I still learned a lot and will be able to rewrite it with what I learned, but it is still a setback. 
 
 
+# Monday 
+
+I have been looking at options to avoid using environment variables and load_dotenv() for the postgres configuration. I have worked out app.config.fromobject and app.config.frompyfile.  
+
+Object could be convenient for something like this:
+```
+class Config(object):
+    TESTING = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class ProductionConfig(Config):
+    DATABASE_URI = "mysql://user@localhost/foo"
+
+
+class DevelopmentConfig(Config):
+    DATABASE_URI = "postgresql+psycopg2://postgres:pgpassword@postgres:5432/postgres"
+
+
+class TestingConfig(Config):
+    DATABASE_URI = "sqlite:///:memory:"
+    TESTING = True
+
+```
+Which I found in the docs. However the from_object docs say:
+from_object(obj)
+"You should not use this function to load the actual configuration but rather configuration defaults. The actual config should be loaded with from_pyfile() and ideally from a location not within the package because the package might be installed system wide."
+
+So I am not sure whethey they recommend it or not.
+
+### Tuesday
+
+```
+def test_database_add_change_event(
+    test_app, db, valid_change_event, valid_change_event_data
+):
+    with test_app.app_context():
+        print(test_app.config["SQLALCHEMY_DATABASE_URI"])
+        db.session.add(ChangeEvent(valid_change_event_data))
+
+        print(db.metadata.tables)
+        db.session.commit()
+
+        query = db.session.query.get(1)
+        assert valid_change_event.id == query.id
+        assert valid_change_event.data == query.data
+        assert query.data == valid_change_event_data
+```
+
+After some time trying to get this to work I found that it was working, it was just sending the ChangeEvent to my main database, not my test database, I used
+```print(test_app.config["SQLALCHEMY_DATABASE_URI"])```
+which printed the test database, yet it is still doing the original database. I think it is an issue with importing and my pytest fixtures. I tried reformulating them but came into more issues. I decided that since we have a containerised app, if we wanted to test we could just run a fresh couple containers, with no need to configure a separate test_db. 
 
 # Appendix
 
