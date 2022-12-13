@@ -1,30 +1,29 @@
 import pytest
-from source.app import app
+from source.app import app, create_app, ChangeEvent
 from flask_sqlalchemy import SQLAlchemy
-from config.config import TestingConfig
+from config.config import Config
+
+
+@pytest.fixture
+def test_app():
+    test_app = create_app(Config)
+    yield test_app
 
 
 @pytest.fixture
 def client():
-
     app.config["TESTING"] = True
     client = app.test_client()
-
     yield client
 
 
 @pytest.fixture
-def db(app):
-    app.config.from_object(TestingConfig())
-    db = SQLAlchemy(app)
-
-    # Create all the tables in the database
-    db.create_all()
-
+def db(test_app):
+    db = SQLAlchemy(test_app)
     yield db
-
-    # Drop all the tables in the database
-    db.drop_all()
+    with test_app.app_context():
+        db.session.rollback()
+        db.drop_all()
 
 
 @pytest.fixture
@@ -53,7 +52,7 @@ def valid_payload_body():
 @pytest.fixture
 def valid_change_event_data():
     return {
-        "ts": "2022-12-11T12:34:56Z",
+        "ts": "2022-12-11T12:34:56A",
         "source": "github",
         "change_type": "push",
         "data": {
@@ -91,3 +90,8 @@ def invalid_payload_body():
             "message": "Add new feature",
         },
     }
+
+
+@pytest.fixture
+def valid_change_event(valid_change_event_data):
+    return ChangeEvent(valid_change_event_data)

@@ -7,26 +7,11 @@ services:
       - "5000:5000"
     volumes:
       - .:/code
-    environment:
-      FLASK_CONFIG: development
-      FLASK_DEBUG: True
     
   db:
     container_name: db
-    image: postgres:latest
+    image: postgres:15.1-alpine
     ports: 
-      - 5432:5432
+      - 5432
     env_file:
       - .env
-
-  
-  db-test:
-    container_name: db-test
-    image: postgres:latest
-    ports: 
-      - 5433:5432
-    environment:
-      POSTGRES_HOST: db-test
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pgpassword
-      POSTGRES_DB: testing

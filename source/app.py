@@ -5,19 +5,20 @@ import os
 import json
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
-from config.config import DevelopmentConfig
+from config.config import Config
+from datetime import datetime
 
 
 # instantiating Flask
-def create_app():
+def create_app(config):
 
     app = Flask(__name__)
 
-    app.config.from_object(DevelopmentConfig())
+    app.config.from_object(config)
     return app
 
 
-app = create_app()
+app = create_app(Config)
 
 # instantiating sqlalchemy database
 db = SQLAlchemy(app)
@@ -27,12 +28,14 @@ class ChangeEvent(db.Model):
     __tablename__ = "changes"
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.JSON, nullable=False)
+    date_added = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, data):
         self.data = data
+        self.date_added = datetime.now()
 
     def __repr__(self):
-        return "<Change Event Data = {}>".format(self.data)
+        return f"{self.date_added}, <Change Event Data = {self.data}>"
 
 
 with app.app_context():

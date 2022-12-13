@@ -1,7 +1,7 @@
-import json
 import pytest
-from source.app import ChangeEvent, app
+from source.app import ChangeEvent
 from pytest_fixtures import (
+    test_app,
     db,
     client,
     valid_payload_headers,
@@ -9,6 +9,7 @@ from pytest_fixtures import (
     valid_change_event_data,
     invalid_payload_headers,
     invalid_payload_body,
+    valid_change_event,
 )
 
 # Test get request to homepage gives correct status code and welcome message
@@ -33,13 +34,24 @@ def test_webhook_receiver_push_event(client, valid_payload_headers, valid_payloa
     assert b"Webhook received and information added to database" in test_response.data
 
 
-def test_change_event(valid_change_event_data):
+def test_change_event(test_app, db, valid_change_event_data):
     # Check that the correct information was added to the database
     change_event = ChangeEvent(valid_change_event_data)
-    query = db.session.query(ChangeEvent).first()
-    assert change_event.id == query.id
     assert change_event.data == valid_change_event_data
-    assert query.data == valid_change_event_data
+
+
+def test_database_add_change_event(
+    test_app, db, valid_change_event, valid_change_event_data
+):
+    with test_app.app_context():
+        change_event = ChangeEvent(valid_change_event_data)
+        db.session.add(change_event)
+        db.session.commit()
+        id = change_event.id
+        query = db.session.get(ChangeEvent, id)
+        assert valid_change_event.data == query.data
+        assert query.date_added
+        assert query.data == valid_change_event_data
 
 
 def test_webhook_receiver_non_push_event(

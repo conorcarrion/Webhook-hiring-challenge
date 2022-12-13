@@ -157,6 +157,29 @@ from_object(obj)
 
 So I am not sure whethey they recommend it or not.
 
+### Tuesday
+
+```
+def test_database_add_change_event(
+    test_app, db, valid_change_event, valid_change_event_data
+):
+    with test_app.app_context():
+        print(test_app.config["SQLALCHEMY_DATABASE_URI"])
+        db.session.add(ChangeEvent(valid_change_event_data))
+
+        print(db.metadata.tables)
+        db.session.commit()
+
+        query = db.session.query.get(1)
+        assert valid_change_event.id == query.id
+        assert valid_change_event.data == query.data
+        assert query.data == valid_change_event_data
+```
+
+After some time trying to get this to work I found that it was working, it was just sending the ChangeEvent to my main database, not my test database, I used
+```print(test_app.config["SQLALCHEMY_DATABASE_URI"])```
+which printed the test database, yet it is still doing the original database. I think it is an issue with importing and my pytest fixtures. I tried reformulating them but came into more issues. I decided that since we have a containerised app, if we wanted to test we could just run a fresh couple containers, with no need to configure a separate test_db. 
+
 # Appendix
 
 # <company> Hiring Challenge
