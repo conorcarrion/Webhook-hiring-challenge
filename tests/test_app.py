@@ -1,5 +1,5 @@
 import pytest
-from source.app import ChangeEvent
+from ..source.app import ChangeEvent
 from pytest_fixtures import (
     test_app,
     db,
