@@ -180,6 +180,11 @@ After some time trying to get this to work I found that it was working, it was j
 ```print(test_app.config["SQLALCHEMY_DATABASE_URI"])```
 which printed the test database, yet it is still doing the original database. I think it is an issue with importing and my pytest fixtures. I tried reformulating them but came into more issues. I decided that since we have a containerised app, if we wanted to test we could just run a fresh couple containers, with no need to configure a separate test_db. 
 
+
+### Wednesday
+
+need to add a command to the pytest github actions to start up a container with the app so that the test_app database tests work.
+
 # Appendix
 
 # <company> Hiring Challenge
